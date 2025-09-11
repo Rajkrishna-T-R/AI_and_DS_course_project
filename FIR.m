@@ -1,5 +1,6 @@
 function [filtered_data_final] = FIR(path,high_cutoff,low_cutoff)
 
+% APPLYING THE FIR FILTER
 
 % This function returns the same array as [2 x 100]
 %  each with [64 x 512] the original data
