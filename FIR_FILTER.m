@@ -1,12 +1,12 @@
-function [filtered_data_final] = FIR(path,high_cutoff,low_cutoff)
+function [filtered_data_final] = FIR(path,num_trials,high_cutoff,low_cutoff)
 
-% APPLYING THE FIR FILTER
 
 % This function returns the same array as [2 x 100]
 %  each with [64 x 512] the original data
   
 arguments (Input)
  path
+ num_trials
  high_cutoff
  low_cutoff
 end
@@ -22,7 +22,6 @@ all_trials = data.eeg_data_wrt_task_rep_no_eog_256Hz_end_trial;
 
 fs = 256;              % Sampling frequency (Hz)  
 order = 100;           % Filter order (higher = sharper) 
-num_trials=100;
 num_channels=64;
 num_samples=512;
 
