@@ -1,8 +1,6 @@
 function [filtered_data_final] = FIR(path,num_trials,high_cutoff,low_cutoff)
 
-
-% This function returns the same array as [2 x 100]
-%  each with [64 x 512] the original data
+% Isolate the brain activity in a specific frequency range
   
 arguments (Input)
  path
@@ -14,6 +12,8 @@ end
 arguments (Output)
   filtered_data_final
 end
+
+fprintf('\n=== FINITE IMPULSE RESPONSE === \n\n')
 
 data=load(path);
 
@@ -35,16 +35,9 @@ Wn = [low_cutoff high_cutoff] / (fs/2); % Bandpass low to up Hz, normalized
 
 b = fir1(order, Wn, 'bandpass');        % FIR filter coefficients
 
-
-
-
-
-filtered_data_final =cell(2,num_trials); % 2 x 100
+filtered_data_final = cell(2,num_trials); % 2 x 100
 
 % each cell is  [64 x 512]
-
-
-
 
 % Filtering Each channel in one trail--
 
@@ -55,40 +48,36 @@ for trial_num = 1:num_trials
 
     trial = all_trials{1, trial_num}; % channel x samples
 
-    filtered_trial=zeros(num_channels,num_samples);
+    filtered_trial = zeros(num_channels, num_samples);
 
-    for ch=1:num_channels
+    for ch = 1:num_channels
 
-        filtered_trial(ch,:) = filter(b,1,trial(ch,:)); 
+        filtered_trial(ch,:) = filter(b, 1, trial(ch, :)); 
 
             % each trail is 64 * 512 as given in the data set
                                                   
     end
-  filtered_data_final{1,trial_num} = filtered_trial;
+  filtered_data_final{1, trial_num} = filtered_trial;
 end
 
 
 % ----- class 2 -----
 
-
-
-
 for trial_num = 1:num_trials
 
     trial = all_trials{2, trial_num}; % channel x samples
-    filtered_trial=zeros(num_channels,num_samples);
+    filtered_trial = zeros(num_channels, num_samples);
 
-    for ch=1:num_channels
+    for ch = 1:num_channels
 
-        filtered_trial(ch,:) = filter(b,1,trial(ch,:)); 
+        filtered_trial(ch,:) = filter(b, 1, trial(ch,:)); 
 
             % each trail is 64 * 512 as given in the data set
                                                   
     end
-  filtered_data_final{2,trial_num}=filtered_trial;
+  filtered_data_final{2, trial_num} = filtered_trial;
 end
 
-disp(size(filtered_data_final));
-
+fprintf('Dimensions of X_bandpass: %d x %d \n', size(filtered_data_final));
 
 end
