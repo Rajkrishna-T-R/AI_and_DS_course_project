@@ -1,8 +1,9 @@
-function [X1,X2] = dataAug(path,num_trials)
-%   Summary of this function goes here
-%   Detailed explanation goes here
+function [X1,X2] = dataAug(arr,num_trials)
+
+%   Increases the effective size of the training dataset
+
 arguments (Input)
-    path
+    arr
     num_trials
 end
 
@@ -11,32 +12,30 @@ arguments (Output)
     X2
 end
 
-fprintf('\n\n=== SLIDING WINDOW AUGMENTATION ===\n\n');
-
-% Load your dataset
-data = load(path);
-all_trials = data.eeg_data_wrt_task_rep_no_eog_256Hz_end_trial;
+fprintf('\n=== SLIDING WINDOW AUGMENTATION ===\n\n');
 
 % Parameters
 window_size = 64; % 0.25 seconds
-stride = 64;       % 0.25 seconds overlap
+stride = 64;      % 0.25 seconds overlap
 fs = 256;
 
 % Calculate how many windows we get per trial
+
 num_samples = 512; % original trial length
 num_windows_per_trial = floor((num_samples - window_size)/stride) + 1; %computes to 8
 
-%% Apply sliding window to Class 1
+% Apply sliding window to Class 1
 
 class_1_windows = []; % Store all windows from class 1
 
 class_1_windows_2D = []; % Store as a matrix with 2 dimensions
 
 for trial_num = 1:num_trials
-    % Get one trial from class 1
-    trial = all_trials{1, trial_num}'; % Transpose to 512x64 (time x channels)
+    
+    trial = arr{1, trial_num}';
     
     % Extract sliding windows from this trial
+
     for i = 1:num_windows_per_trial
         start_idx = (i-1)*stride + 1;
         end_idx = start_idx + window_size - 1;
@@ -53,19 +52,19 @@ for trial_num = 1:num_trials
    
 end
 
-%% Apply sliding window to Class 2
+% Apply sliding window to Class 2
 
 class_2_windows = []; % Store all windows from class 2
 
 class_2_windows_2D = []; % Store as a matrix with 2 dimensions
 
 for trial_num = 1:num_trials
-    % Get one trial from class 2
-    trial = all_trials{2, trial_num}'; % Transpose to 512x64 (time x channels)
+    
+    trial = arr{2, trial_num}';
     
     % Extract sliding windows from this trial
     for i = 1:num_windows_per_trial
-        start_idx = (i-1)*stride + 1;
+        start_idx = (i-1) * stride + 1;
         end_idx = start_idx + window_size - 1;
         
         % Get window data (64 x 64)
@@ -80,10 +79,9 @@ for trial_num = 1:num_trials
 
 end
 
-X1 = class_1_windows_2D';
-X2 = class_2_windows_2D';
+X1 = class_1_windows_2D'; 
+X2 = class_2_windows_2D'; 
 
-%% Results
 total_windows_class1 = size(class_1_windows, 3);
 fprintf('Original trial: 512 samples (2 seconds)\n');
 fprintf('Window size: %d samples (%.2f seconds)\n', window_size, window_size/fs);
