@@ -1,6 +1,7 @@
-function [W,lambda,A] = CSP(X1_bandpass,X2_bandpass,num_samples)
-%   Summary of this function goes here
-%   Detailed explanation goes here
+function [X1_CSP,X2_CSP] = CSP(X1_bandpass,X2_bandpass,num_samples)
+
+%  Maximizes the variance of the spatially filtered signal under one condition while minimizing it for the other.
+
 arguments (Input)
     X1_bandpass
     X2_bandpass
@@ -8,31 +9,36 @@ arguments (Input)
 end
 
 arguments (Output)
-    W
-    lambda
-    A
+    X1_CSP
+    X2_CSP
 end
 
     fprintf('\n=== COMMON SPATIAL PATTERNS ===\n\n');
     I_mat = eye(num_samples);
     one_T = ones(num_samples,1);
 
-    X1 = (1/sqrt(num_samples)) * X1_bandpass * (I_mat - (one_T * (one_T')));
+    X1_mean_centered = (1/sqrt(num_samples)) * X1_bandpass * (I_mat - (one_T * (one_T')));
 
-    X2 = (1/sqrt(num_samples)) * X2_bandpass * (I_mat - (one_T * (one_T')));
+    X2_mean_centered = (1/sqrt(num_samples)) * X2_bandpass * (I_mat - (one_T * (one_T')));
 
     % Compute the covariance matrix of each class
-    S1 = cov(X1');   % S1~[C x C]
-    S2 = cov(X2');   % S2~[C x C]
+    S1 = cov(X1_mean_centered');
+    S2 = cov(X2_mean_centered');
 
     % Solve the eigenvalue problem S1·W = l·S2·W
-    [W,L] = eig(S1, S1 + S2);   % Mixing matrix W (spatial filters are columns)
-    lambda = diag(L);           % Eigenvalues
-    A = (inv(W))';              % Demixing matrix
-    fprintf('Dimensions of X1: %d x %d \n', size(X1));
-    fprintf('Dimensions of X2: %d x %d \n', size(X2));
-    fprintf('Dimensions of W: %d x %d \n', size(W));
-    fprintf('Dimensions of λ: %d x %d \n', size(lambda));
+    [W,L] = eig(S1, S1 + S2);   % Filter matrix W
+    lambda = diag(L);           % Eigenvalues λ
+    [lambda, idx] = sort(lambda, 'descend');
+    % Sort the eigenvalues and corresponding eigenvectors
+    W = W(:, idx);
+    A = (inv(W))';              % Pattern matrix A
+    X1_CSP = (W(: , 1:2))' * X1_mean_centered;
+    X2_CSP = (W(: , 1:2))' * X2_mean_centered;
+
+    fprintf('Dimensions of X1_CSP: %d x %d \n', size(X1_CSP));
+    fprintf('Dimensions of X2_CSP: %d x %d \n', size(X2_CSP));
+    fprintf('Dimensions of W_CSP: %d x %d \n', size(W));
+    fprintf('Dimensions of λ_CSP: %d x %d \n', size(lambda));
     fprintf('Dimensions of A: %d x %d \n', size(A));
     
 end
